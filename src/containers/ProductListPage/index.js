@@ -1,59 +1,33 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect } from "react";
-import { getProductsBySlug } from "../../actions";
+import React from "react";
 import Layout from "../../components/Layout";
-import { useDispatch, useSelector } from "react-redux";
+import getParams from "../../utils/getParams";
+import ClothingAndAccessories from "./ClothingAndAccessories";
+import ProductPage from "./ProductPage";
+import ProductStore from "./ProductStore";
 import "./style.css";
-import { generatePublicUrl } from "../../urlConfig";
 
-function ProductListPage(props) {
-  const product = useSelector((state) => state.product);
-  const dispatch = useDispatch();
-  useEffect(() => {
+
+
+const ProductListPage = (props) => {
+  const renderProduct = () => {
     console.log(props);
-    const { match } = props;
-    console.log(match.params.slug);
-    dispatch(getProductsBySlug(match.params.slug));
-  }, []);
+    const params = getParams(props.location.search);
+    let content = null;
+    switch (params.type) {
+      case "store":
+        content = <ProductStore {...props} />;
+        break;
+      case "page":
+        content = <ProductPage {...props} />;
+        break;
+      default:
+        content = <ClothingAndAccessories {...props} />;
+    }
 
-  return (
-    <Layout>
-      {Object.keys(product.productsByPrice).map((key, index) => {
-        return (
-          <div className="card">
-            <div className="cardHeader">
-              {props.match.params.slug} mobile {key}
-              <button>View all</button>
-            </div>
-            <div style={{display: 'flex'}}>
-              {product.productsByPrice[key].map((product) => {
-                return (
-                  <div className="productContainer">
-                    <div className="productImgContainer">
-                      <img
-                        src={generatePublicUrl(product.productPictures[0].img)}
-                        alt=""
-                      />
-                    </div>
-                    <div className="productInfo">
-                      <div>
-                        <div style={{ margin: "5px 0" }}>
-                          {product.name}
-                        </div>
-                        <span>4.5</span>&nbsp;
-                        <span>3333</span>
-                      </div>
-                      <div className="productPrice">{`Rs. ${product.price}`}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-    </Layout>
-  );
-}
+    return content;
+  };
+
+  return <Layout>{renderProduct()}</Layout>;
+};
 
 export default ProductListPage;
